@@ -1,19 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { socket } from "./utils/socket";
+import "./App.css";
+import "react-responsive-modal/styles.css";
+import Circle from "./components/Circle";
+import Cross from "./components/Cross";
+import Modal from "react-responsive-modal";
 
 const App = () => {
-
   //initBoard
   const initBoard = [[-1, -1, -1], [-1, -1, -1], [-1, -1, -1]];
-
   const [roomId, setRoomId] = useState<string | null>();
-  const [currentPlayer, setCurrentPlayer] = useState<any>({ name: "Rohan" });
-  const [opponentPlayer, setOpponentPlayer] = useState<any>();
+  const [currentPlayer, setCurrentPlayer] = useState<any>({});
+  const [opponentPlayer, setOpponentPlayer] = useState<any>({});
   const [currentTurn, setCurrentTurn] = useState();
-  const [board, setBoard] = useState(initBoard)
-  const [playingAs, setPlayingAs] = useState(null);
+  const [initialTurn, setInitialTurn] = useState();
+  const [board, setBoard] = useState(initBoard);
   const [gameStatus, setGameStatus] = useState("NOT_STARTED");
-  const [finishedState, setFinishedState] = useState<any>();
+  const [finishedState, setFinishedState] = useState<number>(-1);
+  // const [isNameDisabled, setIsNameDisabled] = useState(true);
+  const [isCreateRoomModal, setIsCreateRoomModal] = useState(false);
+  const [isJoinRoomModal, setIsJoinRoomModal] = useState(false);
+  const [isPlayingAsCross, setIsPlayingAsCross] = useState(true);
+  const MainRef = useRef(null);
 
   socket?.on("connect", function () {
     console.log("Socket connection established");
@@ -25,7 +33,6 @@ const App = () => {
   })
 
   socket?.on("game_turn", (data) => {
-    console.log(data);
     setCurrentTurn(data);
   })
 
@@ -35,13 +42,17 @@ const App = () => {
 
   socket?.on("room_info", (data: any) => {
     console.log(data);
+    setFinishedState(-1);
+    setBoard(initBoard)
     if (data?.player1?.id === currentPlayer?.socketId) {
-      setPlayingAs(data?.player1?.playingAs);
-      setOpponentPlayer({ socketId: data?.player2?.id, name: data?.player2?.name })
+      setCurrentPlayer({ ...currentPlayer, playingAs: data?.player1?.playingAs });
+      setOpponentPlayer({ socketId: data?.player2?.id, name: data?.player2?.name, playingAs: data?.player2?.playingAs })
     } else {
-      setPlayingAs(data?.player2?.playingAs);
-      setOpponentPlayer({ socketId: data?.player1?.id, name: data?.player1?.name })
+      setCurrentPlayer({ ...currentPlayer, playingAs: data?.player2?.playingAs });
+      setOpponentPlayer({ socketId: data?.player1?.id, name: data?.player1?.name, playingAs: data?.player1?.playingAs })
     }
+    setInitialTurn(data?.turn);
+    setCurrentTurn(data?.turn);
   })
 
   useEffect(() => {
@@ -50,6 +61,27 @@ const App = () => {
       setFinishedState(winner);
     }
   }, [board])
+
+  // useEffect(() => {
+  //   getRandomName();
+  // }, [])
+
+  // const getRandomName = async () => {
+  //   const res = await fetch("https://randomuser.me/api");
+  //   const data = await res.json();
+  //   const name = data.results[0].name.first;
+  //   // console.log(currentPlayer);
+
+  //   setCurrentPlayer({ ...currentPlayer, name: name });
+  //   // const onlyAlphaNumericPattern: RegExp = new RegExp('[a-zA-Z0-9]+');
+  //   // const s = onlyAlphaNumericPattern.text(name);
+  //   // console.log(s);
+  //   // if () {
+  //   //   setCurrentPlayer({ ...currentPlayer, name: name });
+  //   // } else {
+  //   //   await getRandomName();
+  //   // }
+  // }
 
   const checkWinner = () => {
     // row dynamic
@@ -91,7 +123,7 @@ const App = () => {
       if (e === 0 || e === 1) return true;
     });
 
-    if (isDrawMatch) return "DRAW";
+    if (isDrawMatch) return 2;
     return null;
   }
 
@@ -101,27 +133,29 @@ const App = () => {
   }
 
   const createRoom = () => {
+    setIsCreateRoomModal(false);
     if (!checkName()) {
       alert("Please enter your name");
       return;
     };
     const roomId: string = generateRoomId();
     setRoomId(roomId);
-    socket?.emit("create_room", { roomId: roomId, playerName: currentPlayer.name, playerId: socket.id });
+    socket?.emit("create_room", { roomId: roomId, playerName: currentPlayer.name, playerId: socket.id, playingAs: isPlayingAsCross ? "CROSS" : "CIRCLE" });
   }
 
   const resetGame = () => {
     setGameStatus("NOT_STARTED")
     setRoomId(null);
+    setFinishedState(-1);
     setOpponentPlayer(null);
-    setPlayingAs(null);
   }
   const playAgain = () => {
     setBoard(initBoard);
-    socket.emit("turn", { roomId: roomId, currentTurn: currentPlayer, board: initBoard });
-    setFinishedState(null);
+    setFinishedState(-1);
+    socket.emit("reset", { roomId: roomId, previousMatchTurn: initialTurn, currentPlayerPlayingAs: currentPlayer?.playingAs, opponentPlayerPlayingAs: opponentPlayer?.playingAs });
   }
   const joinRoom = () => {
+    setIsJoinRoomModal(false);
     if (!checkName()) {
       alert("Please enter your name");
       return;
@@ -142,11 +176,11 @@ const App = () => {
   }
 
   const handelClick = (rowId: number, colId: number, previousState: number) => {
-    if (currentTurn !== socket.id || previousState !== -1 || !playingAs) {
+    if (currentTurn !== socket.id || previousState !== -1 || finishedState > -1) {
       return;
     }
     let gameBoard = board;
-    if (playingAs === "CROSS") {
+    if (currentPlayer?.playingAs === "CROSS") {
       gameBoard[rowId][colId] = 0;
     } else {
       gameBoard[rowId][colId] = 1;
@@ -154,56 +188,85 @@ const App = () => {
     setBoard(gameBoard);
     socket.emit("turn", { roomId: roomId, currentTurn: currentPlayer, board: gameBoard });
   }
-
-  if (gameStatus === "NOT_STARTED") {
-    return <>
-      <p>{JSON.stringify(currentPlayer)}</p>
-      <p>{JSON.stringify(opponentPlayer)}</p>
-      <input type="text" placeholder="Enter your name" onChange={(e) => setCurrentPlayer({ ...currentPlayer, name: e.target.value })} />
-      <br />
-      <br />
-      <button onClick={createRoom}>CREATE ROOM</button>
-      <br />
-      <br />
-      <input type="text" placeholder="Enter Room ID" onChange={(e) => setRoomId(e.target.value)} />
-      <button onClick={joinRoom}>JOIN ROOM</button>
-    </>
+  if (!currentPlayer || currentPlayer?.name === null) {
+    return JSON.stringify(currentPlayer);
   }
-  if (gameStatus === "ROOM_FULL_INVALID") {
-    return <>
-      <p>{JSON.stringify(currentPlayer)}</p>
-      <p>{JSON.stringify(opponentPlayer)}</p>
-      <p>Room is ether full or something went wrong</p>
+  if (currentPlayer && gameStatus === "NOT_STARTED") {
+    return <main className="home-page" ref={MainRef}>
+      <div className="home-icons">
+        <Cross />
+        <Circle />
+      </div>
+      <div className="home-actions">
+        <input className="home-action-btn home-action-input" type="text" placeholder="Enter Name" value={currentPlayer.name} onChange={(e) => { setCurrentPlayer({ ...currentPlayer, name: e.target.value }) }} />
+        <button className="home-action-btn" onClick={() => setIsCreateRoomModal(true)}>CREATE</button>
+        <button className="home-action-btn" onClick={() => setIsJoinRoomModal(true)}>JOIN</button>
+      </div>
+      <Modal classNames={{
+        modal: 'room-modal',
+      }} center showCloseIcon={false} blockScroll container={MainRef.current} open={isCreateRoomModal} onClose={() => setIsCreateRoomModal(false)} aria-labelledby="create-room-modal"
+        aria-describedby="create-room-modal">
+        <div className="room-modal-container">
+          <p>Please choose</p>
+          <label className="switch">
+            <input type="checkbox" checked={isPlayingAsCross} onChange={() => setIsPlayingAsCross(!isPlayingAsCross)} />
+            <span className="slider round"></span>
+          </label>
+          {/* <input className="home-action-choose-playing-as" type="checkbox" checked></input> */}
+          <button className="room-join-btn" onClick={createRoom}>JOIN</button>
+        </div>
+      </Modal>
+      <Modal classNames={{
+        modal: 'room-modal',
+      }} center showCloseIcon={false} blockScroll container={MainRef.current} open={isJoinRoomModal} onClose={() => setIsJoinRoomModal(false)} aria-labelledby="join-room-modal"
+        aria-describedby="join-room-modal">
+        <div className="room-modal-container">
+          <input type="text" className="room-join-btn join-room-roomid-input" placeholder="Enter Room ID" onChange={(e) => setRoomId(e.target.value)} />
+          <button className="room-join-btn" onClick={joinRoom}>JOIN</button>
+        </div>
+      </Modal>
+    </main >
+  }
+  if (currentPlayer && gameStatus === "ROOM_FULL_INVALID") {
+    return <main className="invalid-page">
+      <p>Room is either full or something went wrong !!!</p>
       <p>Refresh your page</p>
-    </>
+    </main>
   }
-  if (gameStatus === "WAITING" && roomId) {
-    return <>
-      <p>{JSON.stringify(currentPlayer)}</p>
-      <p>{JSON.stringify(opponentPlayer)}</p>
-      <p>Waiting for your friend - ROOM ID : {roomId}</p>
-      <button onClick={() => leaveRoom(roomId)}>LEAVE ROOM</button>
-    </>
+  if (currentPlayer && gameStatus === "WAITING" && roomId) {
+    return <main className="waiting-page">
+      <div className="waiting-lable">
+        <p>Waiting for your friend!!</p>
+        <p>ROOM ID : {roomId}</p>
+      </div>
+      <button className="leave-room-btn" onClick={() => leaveRoom(roomId)}>LEAVE ROOM</button>
+    </main>
   }
   return (
-    <>
-      <p>YOU - {JSON.stringify(currentPlayer)} As - {playingAs}</p>
-      <p>OPPONENT - {JSON.stringify(opponentPlayer)} As - {opponentPlayer?.playingAs}</p>
-      <p>Game Started</p>
-      <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+    <main className="game-page">
+      <div className="game-page-top">
+        <p className="game-my-playingAs">You are {currentPlayer.playingAs}</p>
+        <div className="players-name">
+          <div className={currentTurn === currentPlayer.socketId ? "name current-turn" : "name"}>{currentPlayer.name}</div>
+          <div className={currentTurn === opponentPlayer.socketId ? "name current-turn" : "name"}>{opponentPlayer.name}</div>
+        </div>
+      </div>
+      <div className="game">
         {board.map((rowArr: number[], rowId) =>
-          <div key={rowId} style={{ display: "flex", gap: "5px" }}>
+          <div key={rowId} className="game-row">
             {rowArr.map((e: number, colId) => {
-              return <div onClick={() => handelClick(rowId, colId, e)} key={colId} style={{ width: "50px", height: "50px", border: "1px solid black", cursor: finishedState !== null ? "not-allowed" : "pointer" }}>{e}</div >
+              return <div className="game-box" onClick={() => handelClick(rowId, colId, e)} key={colId} >{e === 0 ? <Cross /> : e === 1 ? <Circle /> : ""}</div >
             })}
           </div>
         )}
       </div>
-      <br />
-      {finishedState === 0 ? <h2>CROSS WON</h2> : finishedState === 1 ? <h2>CIRCLE won</h2> : finishedState === "DRAW" ? <p>Match is draw</p> : null}
-      {finishedState !== null ? <button onClick={playAgain}>PLAY AGAIN</button> : null}
-      {roomId && <button onClick={() => leaveRoom(roomId)}>LEAVE ROOM</button>}
-    </>
+      <div className="game-page-bottom">
+        {finishedState === 0 ? <h2 className="game-msg">CROSS WON</h2> : finishedState === 1 ? <h2 className="game-msg">CIRCLE won</h2> : finishedState === 2 ? <h2 className="game-msg">Match is draw</h2> : null}
+        {finishedState !== -1 ? <button className="play-again-btn" onClick={playAgain}>PLAY AGAIN</button> : null}
+        {roomId && <button className="leave-room-btn" onClick={() => leaveRoom(roomId)}>LEAVE ROOM</button>}
+        <p className="game-roomid">ROOM ID : {roomId}</p>
+      </div>
+    </main>
   )
 }
 

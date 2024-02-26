@@ -1,0 +1,392 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200..1000&display=swap');
+
+* {
+    padding: 0;
+    margin: 0;
+    font-family: "Nunito", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+}
+
+body {
+    height: 100vh;
+    width: 100vw;
+    background-color: #FF4C4C;
+}
+
+main.home-page {
+    height: 88vh;
+    width: 80vw;
+    padding: 6vh 10vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+main.home-page .home-icons {
+    display: flex;
+    gap: 5vw;
+    height: 35vh;
+    align-items: center;
+}
+
+main.home-page .home-icons svg path {
+    fill: #FFCA27
+}
+
+main.home-page .home-actions {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 3vh;
+}
+
+main.home-page .home-actions .home-action-btn {
+    height: 7vh;
+    border-radius: 10px;
+    border: none;
+    background: #ffca27;
+    font-size: 1.8rem;
+    font-weight: 1000;
+    color: #ff4c4c;
+    text-align: center;
+}
+
+main.home-page .home-actions .home-action-input {
+    background: #ff4c4c;
+    color: #ffca27;
+    border: 5px solid #d33333;
+    outline: none;
+}
+
+main.home-page .home-actions .home-action-input:focus {
+    border: 5px solid #ffca27;
+}
+
+main.home-page .home-actions .home-action-input::placeholder {
+    color: #d33333;
+}
+
+.room-modal {
+    width: 80vw;
+    padding: 0 !important;
+    background: #ffca27 !important;
+    border-radius: 10px;
+}
+
+.room-modal-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+    gap: 1.2rem;
+}
+
+.room-modal-container p {
+    color: #ff4c4c;
+    font-size: 1.8rem;
+    font-weight: 1000;
+}
+
+.room-join-btn {
+    height: 7vh;
+    border-radius: 10px;
+    border: none;
+    background: #ff4c4c;
+    font-size: 1.8rem;
+    font-weight: 1000;
+    color: #ffca27;
+    text-align: center;
+    width: 100%;
+}
+
+.join-room-roomid-input {
+    background: #ffca27;
+    color: #ff4c4c;
+    border: 5px solid #ff7d00;
+    outline: none;
+}
+
+.join-room-roomid-input:focus {
+    border: 5px solid #ff4c4c;
+}
+
+.join-room-roomid-input::placeholder {
+    color: #ff7d00;
+}
+
+/* WAITING PAGE STARTS */
+
+main.waiting-page {
+    height: 88vh;
+    width: 80vw;
+    padding: 6vh 10vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+}
+
+main.waiting-page .waiting-lable {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+main.waiting-page .waiting-lable p {
+    color: #ffca27;
+    font-size: 1.4rem;
+    font-weight: 1000;
+}
+
+.leave-room-btn {
+    height: 7vh;
+    border-radius: 10px;
+    border: none;
+    background: #ffca27;
+    font-size: 1.8rem;
+    font-weight: 1000;
+    color: #ff4c4c;
+    text-align: center;
+    width: 100%;
+}
+
+/* WAITING PAGE ENDS */
+
+/* GAME PAGE STARTS */
+main.game-page {
+    height: 88vh;
+    width: 80vw;
+    padding: 6vh 10vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+main.game-page .game-page-bottom {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+main.game-page .game-page-bottom .game-msg {
+    color: #ffca27;
+    font-size: 1.6rem;
+    font-weight: 1000;
+}
+
+main.game-page .game-page-top {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+main.game-page .game {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    border: 2px solid #d33333;
+}
+
+main.game-page .game-page-bottom .play-again-btn {
+    height: 7vh;
+    border-radius: 10px;
+    border: none;
+    background: #ffca27;
+    font-size: 1.8rem;
+    font-weight: 1000;
+    color: #ff4c4c;
+    text-align: center;
+    width: 100%;
+}
+
+main.game-page .game-page-top .players-name {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 20vw;
+}
+
+main.game-page .game-page-top .players-name .name {
+    color: #d33333;
+    font-size: 1.6rem;
+    font-weight: 1000;
+    background: #ff4c4c;
+    width: 100%;
+    text-align: center;
+    padding: 0.8rem;
+    border-radius: 10px;
+    border: 5px solid #d33333;
+}
+
+main.game-page .game-page-top .players-name .current-turn {
+    color: #ff4c4c;
+    background: #FFCA1A;
+    border: 5px solid #FFCA1A;
+    position: relative;
+}
+
+main.game-page .game-page-top .players-name .current-turn::after {
+    content: "";
+    position: absolute;
+    width: 1rem;
+    height: 1rem;
+    background: #FFCA1A;
+    border-radius: 1rem;
+    top: 4.5rem;
+    left: calc(50% - 0.5rem);
+}
+
+
+main.game-page .game-page-top .game-my-playingAs {
+    color: #ffca27;
+    font-size: 1.4rem;
+    font-weight: 1000;
+}
+
+main.game-page .game-page-bottom .game-roomid {
+    color: #ffca27;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+main.game-page .game .game-row {
+    display: flex;
+}
+
+main.game-page .game .game-row .game-box {
+    width: calc((80vw - 4rem) / 3);
+    height: calc((80vw - 4rem) / 3);
+    border: 3px solid #d33333;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+main.game-page .game .game-row .game-box svg {
+    width: 65%;
+    height: 65%;
+
+}
+
+main.game-page .game .game-row .game-box svg path {
+    fill: #ffca27;
+}
+
+/* GAME PAGE ENDS */
+
+/* INVALID PAGE STARTS*/
+
+main.invalid-page {
+    height: 88vh;
+    width: 80vw;
+    padding: 6vh 10vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+main.invalid-page p {
+    color: #ffca27;
+    font-size: 1.4rem;
+    font-weight: 1000;
+    text-align: center;
+}
+
+/* INVALID PAGE ENDS */
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch::before {
+    content: "CIRCLE";
+    position: absolute;
+    left: -6rem;
+    color: #ff4c4c;
+    font-size: 1.2rem;
+    font-weight: 1000;
+    top: 4px;
+}
+
+.switch::after {
+    content: "CROSS";
+    position: absolute;
+    left: 5.3rem;
+    color: #ff4c4c;
+    font-size: 1.2rem;
+    font-weight: 1000;
+    top: 4px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked+.slider {
+    background-color: #ff4c4c;
+}
+
+input:focus+.slider {
+    box-shadow: 0 0 1px #ff4c4c;
+}
+
+input:checked+.slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
